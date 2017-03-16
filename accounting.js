@@ -124,13 +124,25 @@
 	/**
 	 * Parses a format string or object and returns format obj for use in rendering
 	 *
-	 * `format` is either a string with the default (positive) format, or object
-	 * containing `pos` (required), `neg` and `zero` values (or a function returning
-	 * either a string or object)
+	 * Parameters:
+	 * string    has "default positve format", must contain "%v"
+	 * object    has 'pos' (required, must contain "%v"), 'neg', 'zero' properties 
+	 * function  returns a string or object like above
 	 *
-	 * Either string or format.pos must contain "%v" (value) to be valid
+	 * Returns:
+	 * object    has 'pos' (required, must contain "%v"), 'neg', 'zero' properties
 	 */
+	// Scenarios:
+	// A: Valid string      ==> convert string to a format object
+	// B: Invalid string    ==> use default and turn it to an obj if it's not already
+	// C: Valid object      ==> leave the object alone
+	// D: Invalid object    ==> use default and turn it to an obj if it is not already
+	// E: Function          ==> Depends on what the function returns
+	// F: Nothing           ==> use default and turn it to an obj if it is not already
+
+
 	function checkCurrencyFormat(format) {
+		// Default value will be %s %v format
 		var defaults = lib.settings.currency.format;
 
 		// Allow function as format parameter (should return string or object):
@@ -142,6 +154,8 @@
 			// Create and return positive, negative and zero formats:
 			return {
 				pos : format,
+				// '%s -- %v' ==> '%s -- -%v'
+				// '%s -- %v' ==> '%s - %v' ==> '%s - 5v'
 				neg : format.replace("-", "").replace("%v", "-%v"),
 				zero : format
 			};
@@ -152,6 +166,8 @@
 			// If defaults is a string, casts it to an object for faster checking next time:
 			return ( !isString( defaults ) ) ? defaults : lib.settings.currency.format = {
 				pos : defaults,
+
+
 				neg : defaults.replace("%v", "-%v"),
 				zero : defaults
 			};
@@ -160,6 +176,7 @@
 		// Otherwise, assume format was fine:
 		return format;
 	}
+
 
 
 	/* --- API Methods --- */
